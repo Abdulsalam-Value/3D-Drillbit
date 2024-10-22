@@ -9,16 +9,16 @@ function App() {
   return (
     <Router>
       <div>
+        <header className='flex flex-col items-center text-center gap-y-4 mt-8'>
         <h1>Drilling Application</h1>
-
-        {/* Navigation Links */}
         <nav>
           <Link to="/">Home (Input Data)</Link> | 
           <Link to="/new-page">Graph Page</Link> | 
           <Link to="/cube-test">BHA 3D Model</Link> {/* Updated link to navigate to the BHA 3D model page */}
         </nav>
-
         <Routes>
+        {/* Navigation Links */}
+
           {/* Home Route - Displays WellPathTable and DrillStringTable */}
           <Route
             path="/"
@@ -43,6 +43,9 @@ function App() {
           {/* BHA 3D Model Route - Loads the BHA model and cube test */}
           <Route path="/cube-test" element={<Test3D />} /> {/* Route for testing the 3D cube */}
         </Routes>
+        
+        </header>
+
       </div>
     </Router>
   );

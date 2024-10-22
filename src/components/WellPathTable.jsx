@@ -3,20 +3,20 @@ import * as XLSX from 'xlsx';  // For parsing Excel files
 import { useNavigate } from 'react-router-dom'; // For navigating to the new page
 
 function WellPathTable() {
-  const [rows, setRows] = useState([{ northern: '0', eastern: '0', tvd: '' }]);
+  const [rows, setRows] = useState([{ northing: '', easting: '', tvd: '' }]);
   const navigate = useNavigate();  // Initialize navigation
 
   // Handle input changes for each row
   const handleInputChange = (index, event) => {
     const { name, value } = event.target;
     const updatedRows = [...rows];
-    updatedRows[index][name] = value === '' ? '0' : value;  // Default to "0" if empty
+    updatedRows[index][name] = value;  // Update the corresponding row's field
     setRows(updatedRows);
   };
 
-  // Add a new row
+  // Add a new row with empty values by default
   const addRow = () => {
-    setRows([...rows, { northern: '0', eastern: '0', tvd: '' }]);
+    setRows([...rows, { northing: '', easting: '', tvd: '' }]);
   };
 
   // Remove the last row
@@ -37,13 +37,15 @@ function WellPathTable() {
       const firstSheetName = workbook.SheetNames[0];
       const worksheet = XLSX.utils.sheet_to_json(workbook.Sheets[firstSheetName]);
 
+      // Populate the rows based on the Excel file
       const importedData = worksheet.map((row) => ({
-        northern: row['Northern'] || '0',  // Default to "0" if missing
-        eastern: row['Eastern'] || '0',  // Default to "0" if missing
-        tvd: row['TVD'] || '',
+        northing: row['Northing'] !== undefined ? String(row['Northing']) : '0',  // If undefined, set to '0'
+        easting: row['Easting'] !== undefined ? String(row['Easting']) : '0',    // If undefined, set to '0'
+        tvd: row['TVD'] !== undefined ? String(row['TVD']) : '',  // TVD can be blank or defaulted
       }));
 
-      setRows(importedData);  // Populate the table with imported data
+      // Set the rows with imported data
+      setRows(importedData);
     };
 
     reader.readAsArrayBuffer(file);
@@ -51,80 +53,95 @@ function WellPathTable() {
 
   // Handle plot button click - navigate to the plot page and pass data
   const handlePlot = () => {
-    // Navigate to the plot page and pass the data
-    navigate('/new-page', { state: { wellPathData: rows } });
+    // Validate data before plotting: Ensure no empty fields
+    const validData = rows.filter(row => row.northing && row.easting && row.tvd);
+    if (validData.length > 0) {
+      navigate('/new-page', { state: { wellPathData: validData } });
+    } else {
+      alert("Please ensure all fields are filled or imported before plotting.");
+    }
   };
 
   return (
-    <div>
-      <h2>Well Path Data Input</h2>
-
-      {/* Import Button for Excel file */}
-      <input type="file" accept=".xlsx, .xls" onChange={handleImport} />
-
-      {/* Scrollable Box for Well Path Data */}
-      <div style={{ height: '300px', overflowY: 'auto', border: '1px solid #ccc', padding: '10px', marginTop: '20px' }}>
-        <table style={{ width: '100%' }}>
-          <thead>
-            <tr>
-              <th>Northern (m)</th>
-              <th>Eastern (m)</th>
-              <th>TVD (m)</th>
+    <div className="flex flex-col items-center p-8">
+    <h2 className="text-3xl font-bold mb-6 text-gray-800">Well Path Data Input</h2>
+  
+    {/* Import Button for Excel file */}
+    <input
+      type="file"
+      accept=".xlsx, .xls"
+      onChange={handleImport}
+      className="mb-4 text-sm text-gray-600 bg-white border border-gray-300 rounded-lg px-4 py-2 shadow-sm focus:outline-none focus:ring focus:ring-blue-200"
+    />
+  
+    {/* Scrollable Box for Well Path Data */}
+    <div className="w-full max-w-4xl max-h-[300px] overflow-y-auto shadow-lg border border-gray-300 rounded-lg mt-6">
+      <table className="min-w-full table-auto bg-white">
+        <thead>
+          <tr className="bg-blue-600 text-white">
+            <th className="px-4 py-2">Northing (m)</th>
+            <th className="px-4 py-2">Easting (m)</th>
+            <th className="px-4 py-2">TVD (m)</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row, index) => (
+            <tr key={index} className="text-center border-t">
+              <td className="border px-4 py-2">
+                <input
+                  type="text"
+                  name="northing"
+                  value={row.northing}
+                  onChange={(e) => handleInputChange(index, e)}
+                  className="border border-gray-300 rounded-lg px-3 py-2 w-full focus:ring focus:ring-blue-200 focus:outline-none"
+                />
+              </td>
+              <td className="border px-4 py-2">
+                <input
+                  type="text"
+                  name="easting"
+                  value={row.easting}
+                  onChange={(e) => handleInputChange(index, e)}
+                  className="border border-gray-300 rounded-lg px-3 py-2 w-full focus:ring focus:ring-blue-200 focus:outline-none"
+                />
+              </td>
+              <td className="border px-4 py-2">
+                <input
+                  type="text"
+                  name="tvd"
+                  value={row.tvd}
+                  onChange={(e) => handleInputChange(index, e)}
+                  className="border border-gray-300 rounded-lg px-3 py-2 w-full focus:ring focus:ring-blue-200 focus:outline-none"
+                />
+              </td>
             </tr>
-          </thead>
-          <tbody>
-            {rows.map((row, index) => (
-              <tr key={index}>
-                <td>
-                  <input
-                    type="text"
-                    name="northern"
-                    value={row.northern}
-                    onChange={(e) => handleInputChange(index, e)}
-                  />
-                </td>
-                <td>
-                  <input
-                    type="text"
-                    name="eastern"
-                    value={row.eastern}
-                    onChange={(e) => handleInputChange(index, e)}
-                  />
-                </td>
-                <td>
-                  <input
-                    type="text"
-                    name="tvd"
-                    value={row.tvd}
-                    onChange={(e) => handleInputChange(index, e)}
-                  />
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      <button onClick={addRow}>Add Path</button>
-      <button onClick={removeRow}>Remove Path</button>
-
-      {/* Plot Button */}
+          ))}
+        </tbody>
+      </table>
+    </div>
+  
+    <div className="flex space-x-4 mt-6">
+      <button
+        onClick={addRow}
+        className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-300"
+      >
+        Add Path
+      </button>
+      <button
+        onClick={removeRow}
+        className="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-300"
+      >
+        Remove Path
+      </button>
       <button
         onClick={handlePlot}
-        style={{
-          marginTop: '20px',
-          padding: '10px 20px',
-          fontSize: '18px',
-          backgroundColor: '#007bff',
-          color: 'white',
-          border: 'none',
-          borderRadius: '5px',
-          cursor: 'pointer',
-        }}
+        className="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-300"
       >
         Plot Well Path Trajectory
       </button>
     </div>
+  </div>
+  
   );
 }
 

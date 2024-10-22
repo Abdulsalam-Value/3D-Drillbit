@@ -4,6 +4,7 @@ import WellPathTable from './components/WellPathTable';  // Well Path Table Comp
 import DrillStringTable from './components/DrillStringTable';  // Drill String Table Component
 import NewPage from './components/NewPage';  // New page component with graph
 import Test3D from './components/Test3D'; // Component that will load the BHA model and cube test
+import NewPathWithBHA from './components/NewPathWithBHA';
 
 function App() {
   return (
@@ -42,6 +43,7 @@ function App() {
 
           {/* BHA 3D Model Route - Loads the BHA model and cube test */}
           <Route path="/cube-test" element={<Test3D />} /> {/* Route for testing the 3D cube */}
+          <Route path="/cube-tests" element={<NewPathWithBHA />} /> {/* Route for testing the 3D cube */}
         </Routes>
       </div>
     </Router>

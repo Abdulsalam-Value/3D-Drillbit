@@ -7,7 +7,7 @@ function RotatingCube() {
   return (
     <mesh rotation={[45, 45, 0]}>
       <boxGeometry args={[1, 1, 1]} />
-      <meshStandardMaterial color={'orange'} />
+      <meshStandardMaterial color={'red'} />
     </mesh>
   );
 }

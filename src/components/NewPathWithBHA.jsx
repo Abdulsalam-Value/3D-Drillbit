@@ -4,7 +4,9 @@ import { OrbitControls, useGLTF } from '@react-three/drei';
 
 // Component to load and display the BHA model
 function BHAComponent() {
-  const { scene } = useGLTF('/models/Combined_tool(BHA)-Drill_collar_002.gltf'); // Ensure correct path to the GLTF file
+  const { scene } = useGLTF('./scene.gltf', true, (error) => {
+    console.error('Error loading GLTF model:', error);
+  });
 
   console.log('BHA Loaded:', scene); // Log to check if the model is loading
 
@@ -15,15 +17,15 @@ function BHAComponent() {
   return <primitive object={scene} scale={5} position={[0, 0, 0]} />; // Adjusted scale and position
 }
 
-// Main component for rendering the 3D environment
 export default function NewPathWithBHA() {
   return (
     <div style={{ height: '100vh' }}>
+      <h1>well</h1>
       <Canvas>
         <ambientLight intensity={0.5} />
         <pointLight position={[10, 10, 10]} />
         <OrbitControls />
-        
+
         {/* Add a simple cube to ensure the scene is rendering */}
         <mesh>
           <boxGeometry args={[1, 1, 1]} />
